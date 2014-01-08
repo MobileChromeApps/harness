@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+  Copyright (c) 2013 The Chromium Authors. All rights reserved.
+  Use of this source code is governed by a BSD-style license that can be
+  found in the LICENSE file.
+-->
+<plugin xmlns="http://cordova.apache.org/ns/plugins/1.0"
+    id="org.apache.appharness.push"
+    version="1.0.0">
+  <engines>
+    <engine name="cordova" version=">=3.0.0" />
+  </engines>
+
+  <name>App Harness Push Protocol</name>
+
+  <js-module src="push.js" name="Push">
+    <clobbers target="appharness.push" />
+  </js-module>
+
+  <platform name="android">
+    <source-file src="src/android/Push.java" target-dir="src/org/apache/appharness" />
+
+    <config-file target="res/xml/config.xml" parent="/widget">
+      <feature name="HarnessPush">
+        <param name="android-package" value="org.apache.appharness.Push"/>
+      </feature>
+    </config-file>
+  </platform>
+</plugin>
