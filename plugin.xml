@@ -13,12 +13,13 @@
 
   <name>App Harness Push Protocol</name>
 
-  <js-module src="push.js" name="Push">
+  <js-module src="js/push.js" name="Push">
     <clobbers target="appharness.push" />
   </js-module>
 
   <platform name="android">
     <source-file src="src/android/Push.java" target-dir="src/org/apache/appharness" />
+    <source-file src="src/android/nanohttpd/NanoHTTPD.java" target-dir="src/fi/iki/elonen" />
 
     <config-file target="res/xml/config.xml" parent="/widget">
       <feature name="HarnessPush">
