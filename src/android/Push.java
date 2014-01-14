@@ -10,6 +10,7 @@ import java.util.Map;
 
 import fi.iki.elonen.NanoHTTPD;
 
+import org.apache.cordova.Config;
 import org.apache.cordova.CordovaArgs;
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
@@ -17,6 +18,8 @@ import org.apache.cordova.LOG;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import android.annotation.SuppressLint;
+import android.os.Build;
 import android.net.Uri;
 import android.util.Log;
 
@@ -43,6 +46,11 @@ public class Push extends CordovaPlugin {
         }
 
         return false;
+    }
+
+    public void onReset() {
+        Log.w(LOG_TAG, "onReset");
+
     }
 
     private void listen(CallbackContext callbackContext) {
@@ -72,8 +80,23 @@ public class Push extends CordovaPlugin {
             callbackContext.success(latestPush);
             latestPush = null;
         } else {
-            callbackContext.success((JSONObject) null); // TODO: Is this legal?
+            callbackContext.success(0);
         }
+    }
+
+    private void restartAppHarness() {
+        this.cordova.getActivity().runOnUiThread(new Runnable() {
+            @SuppressLint("NewApi")
+            @Override
+            public void run() {
+                String toInject = "window.location = '" + Config.getStartUrl() + "'";
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+                    webView.loadUrl("javascript:" + toInject);
+                } else {
+                    webView.evaluateJavascript(toInject, null);
+                }
+            }
+        });
     }
 
     private class PushServer extends NanoHTTPD {
@@ -105,6 +128,7 @@ public class Push extends CordovaPlugin {
                     payload.put("type", "serve");
                     payload.put("url", params.get("url").get(0));
                     Push.this.latestPush = payload;
+                    Push.this.restartAppHarness();
                     return new Response(Response.Status.OK, "text/plain", "Push successful");
                 } catch (JSONException je) {
                     Log.w(LOG_TAG, "JSONException while building 'serve' mode push data", je);
