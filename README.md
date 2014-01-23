@@ -2,7 +2,7 @@
 
 This repository contains scripts and assets that will remix the [Apache Cordova project](http://cordova.io)'s [App Harness](https://git-wip-us.apache.org/repos/asf/cordova-app-harness.git) so that it can run Chrome Apps on mobile devices. This is based on the plugins from the [cca](https://github.com/MobileChomeApps/mobile-chrome-apps) toolkit.
 
-The script is current quite crude and doesn't build a very nice app bundle. Folliwing is a list of the manual steps required before and after running the script.
+The script is currently quite crude and doesn't build a very nice app bundle. Folliwing is a list of the manual steps required before and after running the script.
 
 ## Before
 
@@ -11,7 +11,7 @@ The script is current quite crude and doesn't build a very nice app bundle. Foll
 
 ## Running
 
-- Go to the directory containing `cordova-app-harness`
+- Go to the directory where you checked out `cordova-app-harness` (but not inside the `cordova-app-harness` directory).
 - Run `path/to/makeharness.sh FolderName [android] [ios]`
 
 
@@ -24,5 +24,5 @@ The script is current quite crude and doesn't build a very nice app bundle. Foll
 
 ## TODO
 
-- Include icons and make the script install them.
 - Have the script check out cordova-app-harness if it's not found.
+- Include icons and make the script install them.
