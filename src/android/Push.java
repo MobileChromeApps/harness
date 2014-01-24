@@ -4,7 +4,10 @@
 
 package org.apache.appharness;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.List;
 import java.util.Map;
 
@@ -83,20 +86,31 @@ public class Push extends CordovaPlugin {
             callbackContext.success(0);
         }
     }
+    
+    private void injectJS(final String toInject) {
+    	injectJS(toInject, false);
+    }
 
-    private void restartAppHarness() {
+    private void injectJS(final String toInject, final boolean clearCache) {
         this.cordova.getActivity().runOnUiThread(new Runnable() {
             @SuppressLint("NewApi")
             @Override
             public void run() {
-                String toInject = "window.location = '" + Config.getStartUrl() + "'";
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+                if (clearCache) webView.clearCache(true);
+            	if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
                     webView.loadUrl("javascript:" + toInject);
                 } else {
                     webView.evaluateJavascript(toInject, null);
                 }
             }
         });
+    }
+
+    private void restartAppHarness() {
+    	// Clearing the cache is necessary to prevent it loading cached files when the app is restarted.
+    	// This is a bit heavy-handed, since it's destroying everything in the cache, but on the other hand
+    	// we're already loading from the local disk, so the cache is superfluous.
+    	injectJS("window.location = '" + Config.getStartUrl() + "'", true /* clearCache */);
     }
 
     private class PushServer extends NanoHTTPD {
@@ -107,36 +121,47 @@ public class Push extends CordovaPlugin {
         public Response serve(IHTTPSession session) {
             if (session.getMethod() != Method.POST)
                 return new Response(Response.Status.METHOD_NOT_ALLOWED, "text/plain", "Method " + String.valueOf(session.getMethod()) + " not allowed.");
-            if (!session.getUri().equals("/push"))
-                return new Response(Response.Status.NOT_FOUND, "text/plain", "URI " + String.valueOf(session.getUri()) + " not found");
 
-            Map<String, List<String>> params = decodeParameters(session.getQueryParameterString());
+            if (session.getUri().equals("/push")) {
+                Map<String, List<String>> params = decodeParameters(session.getQueryParameterString());
 
-            List<String> typeList = params.get("type");
-            String type = null;
-            if (typeList != null) type = typeList.get(0);
-            if (type == null) return new Response(Response.Status.BAD_REQUEST, "text/plain", "No push type specified");
+                List<String> typeList = params.get("type");
+                String type = null;
+                if (typeList != null) type = typeList.get(0);
+                if (type == null) return new Response(Response.Status.BAD_REQUEST, "text/plain", "No push type specified");
 
-            if ("crx".equals(type)) {
-                // Insert code here for saving the CRX file.
-                return new Response(Response.Status.OK, "text/plain", "CRX file uploading is currently unsupported.");
-            } else if ("serve".equals(type)) {
-                // Create the latestPush value from the parameters.
-                try {
-                    JSONObject payload = new JSONObject();
-                    payload.put("name", params.get("name").get(0));
-                    payload.put("type", "serve");
-                    payload.put("url", params.get("url").get(0));
-                    Push.this.latestPush = payload;
-                    Push.this.restartAppHarness();
-                    return new Response(Response.Status.OK, "text/plain", "Push successful");
-                } catch (JSONException je) {
-                    Log.w(LOG_TAG, "JSONException while building 'serve' mode push data", je);
-                    return new Response(Response.Status.INTERNAL_ERROR, "text/plain", "Error building JSON result");
+                if ("crx".equals(type)) {
+                    // Insert code here for saving the CRX file.
+                    return new Response(Response.Status.OK, "text/plain", "CRX file uploading is currently unsupported.");
+                } else if ("serve".equals(type)) {
+                    // Create the latestPush value from the parameters.
+                    try {
+                        JSONObject payload = new JSONObject();
+                        payload.put("name", params.get("name").get(0));
+                        payload.put("type", "serve");
+                        payload.put("url", params.get("url").get(0));
+                        Push.this.latestPush = payload;
+                        Push.this.restartAppHarness();
+                        return new Response(Response.Status.OK, "text/plain", "Push successful");
+                    } catch (JSONException je) {
+                        Log.w(LOG_TAG, "JSONException while building 'serve' mode push data", je);
+                        return new Response(Response.Status.INTERNAL_ERROR, "text/plain", "Error building JSON result");
+                    }
                 }
-            }
 
-            return new Response(Response.Status.BAD_REQUEST, "text/plain", "Push type '" + type + "' unknown");
+                return new Response(Response.Status.BAD_REQUEST, "text/plain", "Push type '" + type + "' unknown");
+            } else if (session.getUri().equals("/exec")) {
+                Map<String, List<String>> params = decodeParameters(session.getQueryParameterString());
+                for (String code : params.get("code")) {
+                    injectJS(code);
+                }
+                return new Response(Response.Status.OK, "text/plain", "Executed successfully");
+            } else if (session.getUri().equals("/menu")) {
+            	injectJS("window.location = 'app-harness:///cdvah/index.html'");
+            	return new Response(Response.Status.OK, "text/plain", "Returning to main menu");
+            } else {
+                return new Response(Response.Status.NOT_FOUND, "text/plain", "URI " + String.valueOf(session.getUri()) + " not found");
+            }
         }
     }
 }
