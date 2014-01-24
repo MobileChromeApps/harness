@@ -1,7 +1,11 @@
+# Licenses
+
 This repository contains original Cordova plugin code, and NanoHTTPD.
 
 The license of the original plugin code follows immediately, and the NanoHTTPD license is included after.
 The NanoHTTPD license is also included in `src/android/nanohttpd/LICENSE.md`.
+
+## License for original Cordova plugin code
 
 Copyright (c) 2014 The Chromium Authors. All rights reserved.
 
@@ -32,7 +36,7 @@ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 
-And the license for NanoHTTPD:
+## License for NanoHTTPD
 
 Copyright (c) 2012-2013 by Paul S. Hawke, 2001,2005-2013 by Jarno Elonen, 2010 by Konstantinos Togias
 All rights reserved.
