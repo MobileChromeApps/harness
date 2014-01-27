@@ -4,33 +4,33 @@
 
 package org.apache.appharness;
 
-import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import fi.iki.elonen.NanoHTTPD;
-
+import org.apache.cordova.CallbackContext;
 import org.apache.cordova.Config;
 import org.apache.cordova.CordovaArgs;
-import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
-import org.apache.cordova.LOG;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.annotation.SuppressLint;
 import android.os.Build;
-import android.net.Uri;
 import android.util.Log;
+import fi.iki.elonen.NanoHTTPD;
 
 public class Push extends CordovaPlugin {
 
     private static final String LOG_TAG = "HarnessPush";
     private static final int PORT = 2424;
-
+    
     private PushServer server;
     private JSONObject latestPush;
     private boolean listening = false;
@@ -67,6 +67,7 @@ public class Push extends CordovaPlugin {
         try {
             server = new PushServer();
             server.start();
+            listening = true;
             callbackContext.success();
         } catch (IOException ioe) {
             Log.w(LOG_TAG, "Error launching web server", ioe);
@@ -131,8 +132,45 @@ public class Push extends CordovaPlugin {
                 if (type == null) return new Response(Response.Status.BAD_REQUEST, "text/plain", "No push type specified");
 
                 if ("crx".equals(type)) {
-                    // Insert code here for saving the CRX file.
-                    return new Response(Response.Status.OK, "text/plain", "CRX file uploading is currently unsupported.");
+                    // Receive the file that came with the request, and save it under /data/data/my.app.id/push.crx.
+                    try {
+                        Map<String, String> files = new HashMap<String, String>();
+                        session.parseBody(files);
+                        if (!files.containsKey("file")) {
+                            return new Response(Response.Status.BAD_REQUEST, "text/plain", "You must send a file with the form key 'file'.");
+                        }
+                        
+                        // Copy the file out of the ephemeral cache/foo location and into somewhere permanent.
+                        String source = files.get("file");
+                        String target = source.replaceFirst("/cache/", "/crx_cache/") + ".crx";
+                        String dir = target.replaceFirst("/[^/]*$", "");
+                        
+                        File cacheDir = new File(dir);
+                        if (! (cacheDir.mkdir() || cacheDir.isDirectory()))
+                        	return new Response(Response.Status.INTERNAL_ERROR, "text/plain", "Could not create cache directory");
+                        
+                        InputStream in = new FileInputStream(new File(source));
+                        OutputStream out = new FileOutputStream(new File(target));
+                        byte[] buf = new byte[1024];
+                        int len;
+                        while((len = in.read(buf)) > 0) {
+                        	out.write(buf, 0, len);
+                        }
+                        in.close();
+                        out.close();
+                        
+                        // Now prepare the return value for the harness.
+                        String url = "file://" + target;
+                        JSONObject payload = new JSONObject();
+                        payload.put("name", params.get("name").get(0));
+                        payload.put("type", "crx");
+                        payload.put("url", url);
+                        Push.this.latestPush = payload;
+                        Push.this.restartAppHarness();
+                        return new Response(Response.Status.OK, "text/plain", "Push successful");
+                    } catch (Exception e) {
+                        Log.w(LOG_TAG, "Exception while receiving files", e);
+                    }
                 } else if ("serve".equals(type)) {
                     // Create the latestPush value from the parameters.
                     try {
@@ -157,7 +195,8 @@ public class Push extends CordovaPlugin {
                 }
                 return new Response(Response.Status.OK, "text/plain", "Executed successfully");
             } else if (session.getUri().equals("/menu")) {
-            	injectJS("window.location = 'app-harness:///cdvah/index.html'");
+            	//injectJS("window.location = 'app-harness:///cdvah/index.html'");
+            	Push.this.restartAppHarness();
             	return new Response(Response.Status.OK, "text/plain", "Returning to main menu");
             } else {
                 return new Response(Response.Status.NOT_FOUND, "text/plain", "URI " + String.valueOf(session.getUri()) + " not found");
