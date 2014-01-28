@@ -17,6 +17,7 @@ cca plugin add org.apache.cordova.file org.apache.cordova.file-transfer org.chro
 # Now straight Cordova plugins
 cordova plugin add https://github.com/MobileChromeApps/zip.git ../cordova-app-harness/UrlRemap
 cordova plugin add "https://git-wip-us.apache.org/repos/asf/cordova-plugins.git#:file-extras"
+cordova plugin add "https://github.com/wildabeast/BarcodeScanner.git"
 
 # Copy in the App Harness assets.
 rm -rf www
