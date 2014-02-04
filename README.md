@@ -17,6 +17,9 @@ The script is currently quite crude and doesn't build a very nice app bundle. Fo
 
 ## After
 
+- **Patch the `FileUtils.java` file code**: This is a manual step that's necessary in the short term.
+    - This file contains a set of lines calling `this.registerFilesystem`. Beneath the existing ones, add another:
+    - `this.registerFilesystem(new LocalFilesystem("root", cordova, "/"));`
 - Update the app's name, description, author, etc. in `config.xml`. Don't edit the package name or it will break on device.
 - Replace the default Cordova icons with your desired icons. TODO: Put icons for the ADT in this repo and have the script install them.
 - Update the `AndroidManifest.xml`, if applicable, to remove `android:debuggable` before release.
