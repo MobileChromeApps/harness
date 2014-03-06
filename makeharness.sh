@@ -1,31 +1,57 @@
-#!/bin/sh
+#!/bin/bash
 
-# Expects cca and cordova to be on your path.
-# Expects to be run from a directory of which cordova-app-harness is a child.
-# Arguments are: makeharness.sh <dir> <platforms...>, eg. makeharness.sh android ios
-# The default is CCAHarness and both Android and iOS.
+if [[ $# -eq 0 || "$1" = "--help" ]]; then
+    echo "Usage: makeharness.sh path/to/cordova-app-harness"
+    echo 'Options via variables:'
+    echo '  PLATFORMS="android ios"'
+    echo '  CORDOVA="path/to/cordova"'
+    echo '  PLUGIN_SEARCH_PATH="path1:path2:path3"'
+    echo '  DIR_NAME="path/to/put/new/project" (default is "CCAHarness")'
+    echo '  CCA="path/to/cca"'
+    exit 1
+fi
 
-DIR=$1
-cordova create $1 org.chromium.harness CCAHarness
-cd $DIR
+CCA="${CCA-cca}"
+AH_PATH=$(cd "$1" && pwd)
+H_PATH=$(cd $(dirname "$0") && pwd)
+DIR_NAME=CCAHarness
 
-cordova platform add $2 $3
+if [[ ! -e "$H_PATH"/harness-push ]]; then
+    git clone https://github.com/MobileChromeApps/harness-push.git || exit $?
+else
+    ( cd "$H_PATH"/harness-push && exec git pull ) || exit $?
+fi
+
+"$AH_PATH/createproject.sh" "$DIR_NAME" || exit 1
+
+if [[ -e "$CCA" ]]; then
+    CCA="$(cd $(dirname "$CCA") && pwd)/$(basename "$CCA")"
+fi
+cd "$DIR_NAME"
 
 # Using CCA here to get the right search path.
-cca plugin add org.apache.cordova.file org.apache.cordova.file-transfer org.chromium.bootstrap org.chromium.navigation org.chromium.fileSystem org.chromium.i18n org.chromium.identity org.chromium.idle org.chromium.notifications org.chromium.power org.chromium.socket org.chromium.syncFileSystem org.chromium.FileChooser org.chromium.polyfill.blob_constructor org.chromium.polyfill.CustomEvent org.chromium.polyfill.xhr_features
+echo "Installing Chromium plugins"
+"$CCA" plugin add \
+    org.chromium.bootstrap \
+    org.chromium.navigation \
+    org.chromium.fileSystem \
+    org.chromium.i18n \
+    org.chromium.identity \
+    org.chromium.idle \
+    org.chromium.notifications \
+    org.chromium.power \
+    org.chromium.socket \
+    org.chromium.syncFileSystem \
+    org.chromium.FileChooser \
+    org.chromium.polyfill.blob_constructor \
+    org.chromium.polyfill.CustomEvent \
+    org.chromium.polyfill.xhr_features \
+    org.apache.cordova.network-information \
+    "$H_PATH"/harness-push
 
-# Now straight Cordova plugins
-cordova plugin add https://github.com/MobileChromeApps/zip.git ../cordova-app-harness/UrlRemap
-cordova plugin add "https://git-wip-us.apache.org/repos/asf/cordova-plugins.git#:file-extras"
-cordova plugin add "https://github.com/wildabeast/BarcodeScanner.git"
 
-# Copy in the App Harness assets.
-rm -rf www
-cp -a ../cordova-app-harness/www .
-
-# Change the start page.
-awk '{ sub(/content src=".*"/, "content src=\"cdvah/index.html\""); print $0 }' config.xml > config.xml.1
-mv config.xml.1 config.xml
-
-cordova prepare
+if [[ $? != 0 ]]; then
+    echo "Plugin installation failed. Probably you need to set PLUGIN_SEARCH_PATH env variable so that it contains the plugin that failed to install."
+    exit 1
+fi
 
