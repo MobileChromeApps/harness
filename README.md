@@ -2,30 +2,24 @@
 
 This repository contains scripts and assets that will remix the [Apache Cordova project](http://cordova.io)'s [App Harness](https://git-wip-us.apache.org/repos/asf/cordova-app-harness.git) so that it can run Chrome Apps on mobile devices. This is based on the plugins from the [cca](https://github.com/MobileChomeApps/mobile-chrome-apps) toolkit.
 
-The script is currently quite crude and doesn't build a very nice app bundle. Folliwing is a list of the manual steps required before and after running the script.
+## Use a Pre-built APK
+Pre-built APKs are available [here](https://github.com/MobileChromeApps/harness/releases).
 
-## Before
+## Building From Source
+Use `makeharness.sh` to create a project. Example invocation:
 
-- Install [cca](https://github.com/MobileChromeApps/mobile-chrome-apps) via NPM: `sudo npm install -g cca`
-- Check out the original Cordova App Harness: `git clone https://git-wip-us.apache.org/repos/asf/cordova-app-harness.git`
+    CCA=../mobile-chrome-apps/src/cca.js ./makeharness.sh ../../cordova/cordova-app-harness/
 
-## Running
+For more info:
 
-- Go to the directory where you checked out `cordova-app-harness` (but not inside the `cordova-app-harness` directory).
-- Run `path/to/makeharness.sh FolderName [android] [ios]`
+    ./makeharness.sh --help
 
+### Extra Steps
 
-## After
-
-- **Patch the `FileUtils.java` file code**: This is a manual step that's necessary in the short term.
-    - This file contains a set of lines calling `this.registerFilesystem`. Beneath the existing ones, add another:
-    - `this.registerFilesystem(new LocalFilesystem("root", cordova, "/"));`
 - Update the app's name, description, author, etc. in `config.xml`. Don't edit the package name or it will break on device.
 - Replace the default Cordova icons with your desired icons. TODO: Put icons for the ADT in this repo and have the script install them.
-- Update the `AndroidManifest.xml`, if applicable, to remove `android:debuggable` before release.
 - Build the app in release mode (using Android Studio or Eclipse ADT) to get a signed APK file.
 
 ## TODO
 
-- Have the script check out cordova-app-harness if it's not found.
-- Include icons and make the script install them.
+- Add icons
