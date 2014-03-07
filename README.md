@@ -8,7 +8,7 @@ Pre-built APKs are available [here](https://github.com/MobileChromeApps/harness/
 ## Building From Source
 Use `makeharness.sh` to create a project. Example invocation:
 
-    CCA=../mobile-chrome-apps/src/cca.js ./makeharness.sh ../../cordova/cordova-app-harness/
+    PLATFORMS="android ios" ./makeharness.sh ../../cordova/cordova-app-harness
 
 For more info:
 
