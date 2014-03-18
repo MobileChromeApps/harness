@@ -16,12 +16,6 @@ AH_PATH=$(cd "$1" && pwd)
 H_PATH=$(cd $(dirname "$0") && pwd)
 DIR_NAME=CCAHarness
 
-if [[ ! -e "$H_PATH"/harness-push ]]; then
-    git clone https://github.com/MobileChromeApps/harness-push.git || exit $?
-else
-    ( cd "$H_PATH"/harness-push && exec git pull ) || exit $?
-fi
-
 "$AH_PATH/createproject.sh" "$DIR_NAME" || exit 1
 
 if [[ -e "$CCA" ]]; then
