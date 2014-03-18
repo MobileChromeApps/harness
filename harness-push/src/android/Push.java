@@ -51,11 +51,6 @@ public class Push extends CordovaPlugin {
         return false;
     }
 
-    public void onReset() {
-        Log.w(LOG_TAG, "onReset");
-
-    }
-
     private void listen(CallbackContext callbackContext) {
         // First, check that we're not already listening.
         if (listening) {
@@ -89,15 +84,10 @@ public class Push extends CordovaPlugin {
     }
     
     private void injectJS(final String toInject) {
-    	injectJS(toInject, false);
-    }
-
-    private void injectJS(final String toInject, final boolean clearCache) {
         this.cordova.getActivity().runOnUiThread(new Runnable() {
             @SuppressLint("NewApi")
             @Override
             public void run() {
-                if (clearCache) webView.clearCache(true);
             	if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
                     webView.loadUrl("javascript:" + toInject);
                 } else {
@@ -108,10 +98,7 @@ public class Push extends CordovaPlugin {
     }
 
     private void restartAppHarness() {
-    	// Clearing the cache is necessary to prevent it loading cached files when the app is restarted.
-    	// This is a bit heavy-handed, since it's destroying everything in the cache, but on the other hand
-    	// we're already loading from the local disk, so the cache is superfluous.
-    	injectJS("window.location = '" + Config.getStartUrl() + "'", true /* clearCache */);
+        webView.loadUrlIntoView(Config.getStartUrl(), false);
     }
 
     private class PushServer extends NanoHTTPD {
