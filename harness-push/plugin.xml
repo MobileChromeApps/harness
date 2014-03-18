@@ -13,6 +13,8 @@
 
   <name>App Harness Push Protocol</name>
 
+  <dependency id="org.chromium.socket" />
+
   <platform name="android">
     <source-file src="src/android/Push.java" target-dir="src/org/apache/appharness" />
     <source-file src="src/android/nanohttpd/NanoHTTPD.java" target-dir="src/fi/iki/elonen" />
