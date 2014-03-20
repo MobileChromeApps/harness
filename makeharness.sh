@@ -16,6 +16,8 @@ AH_PATH=$(cd "$1" && pwd)
 H_PATH=$(cd $(dirname "$0") && pwd)
 DIR_NAME=CCAHarness
 
+export APP_ID=org.chromium.ChromeADT
+export APP_NAME="Chrome ADT"
 "$AH_PATH/createproject.sh" "$DIR_NAME" || exit 1
 
 if [[ -e "$CCA" ]]; then
