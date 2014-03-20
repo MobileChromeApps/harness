@@ -1,6 +1,6 @@
 # App Harness Push
 
-This is a [Cordova](http://cordova.io) plugin that integrates with the [App Harness](https://git-wip-us.apache.org/repos/asf/cordova-app-harness.git) to allow pushing new versions of your app over HTTP. This enables live reloading functionality, though making the request is currently the user's responsibility to do manually with `curl`, etc. The plan is to have integration with `cordova watch` or similar, and with [Spark](https://github.com/dart-lang/spark).
+Allows pushing updates of apps to the App Harness.
 
 ## Installation
 
@@ -11,6 +11,16 @@ This is a [Cordova](http://cordova.io) plugin that integrates with the [App Harn
 **You must** press the "Start Listening" button on the main menu of the App Harness prior to using any of the requests below.
 
 There are currently four kinds of requests you can make:
+
+## Port Forwarding
+
+If you are not on the same network, you can use adb to port forward:
+
+    adb forward tcp:2424 tcp:2424
+
+When done:
+
+    adb forward --remove tcp:2424
 
 ### Push - `cordova serve`
 
