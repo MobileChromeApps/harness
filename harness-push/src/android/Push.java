@@ -18,6 +18,8 @@ import org.apache.cordova.CallbackContext;
 import org.apache.cordova.Config;
 import org.apache.cordova.CordovaArgs;
 import org.apache.cordova.CordovaPlugin;
+import org.apache.cordova.urlremap.UrlRemap;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -98,6 +100,7 @@ public class Push extends CordovaPlugin {
     }
 
     private void restartAppHarness() {
+        ((UrlRemap)webView.pluginManager.getPlugin("UrlRemap")).resetMappings();
         webView.loadUrlIntoView(Config.getStartUrl(), false);
     }
 
