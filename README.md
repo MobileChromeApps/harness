@@ -32,10 +32,11 @@ For more info:
   - `vim config.xml`
 - Update versionCode in `platforms/android/AndroidManifest.xml`
   - `vim platforms/android/AndroidManifest.xml`
-- Tag release
-  - `git tag -am "Tagged vX.X.X-alpha"`
 - Build apk
   - `cd CCAHarness && ../buildharness.sh`
+- Tag release
+  - `git tag -am "Tagged vX.X.X-alpha" vX.X.X-alpha`
+  - `git push origin master --tags`
 - Upload apk to GitHub's releases page
   - Attach the apk
   - Write *short* release notes (download link should be visible without scrolling).

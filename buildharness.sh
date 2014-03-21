@@ -1,7 +1,6 @@
 #!/bin/bash
 
 KEYSTORE_PATH=../CCAHarness-debug.keystore
-APK_PATH=platforms/android/ant-build/*-debug.apk
 AAPT_PATH=$(which aapt)
 
 if [[ -z "$AAPT_PATH" ]]; then
@@ -31,14 +30,15 @@ fi
 cordova build android || exit 1
 
 # Remove previous signing artifacts
-"$AAPT_PATH" remove $APK_PATH META-INF/MANIFEST.MF || exit 1
-"$AAPT_PATH" remove $APK_PATH META-INF/CERT.SF
-"$AAPT_PATH" remove $APK_PATH META-INF/CERT.RSA
+APK_PATH=$(ls platforms/android/ant-build/*-debug.apk)
+"$AAPT_PATH" remove "$APK_PATH" META-INF/MANIFEST.MF || exit 1
+"$AAPT_PATH" remove "$APK_PATH" META-INF/CERT.SF
+"$AAPT_PATH" remove "$APK_PATH" META-INF/CERT.RSA
 
 # Resign.
-jarsigner -verbose -sigalg MD5withRSA -digestalg SHA1 -keystore $KEYSTORE_PATH -storepass android $APK_PATH androiddebugkey || exit 1
+jarsigner -verbose -sigalg MD5withRSA -digestalg SHA1 -keystore $KEYSTORE_PATH -storepass android "$APK_PATH" androiddebugkey || exit 1
 
 # Verify signing
-jarsigner -verify $APK_PATH || exit 1
+jarsigner -verify "$APK_PATH" || exit 1
 
-echo "Build Complete. APK is at: "$APK_PATH
+echo "Build Complete. APK is at: $APK_PATH"
