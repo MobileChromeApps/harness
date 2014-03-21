@@ -9,28 +9,36 @@ from the [cca](https://github.com/MobileChomeApps/mobile-chrome-apps) toolkit.
 ## Use a Pre-built APK
 Pre-built APKs are available [here](https://github.com/MobileChromeApps/harness/releases).
 
-## Building From Source
-Use `makeharness.sh` to create a project. Example invocation:
+## Creating a Project
+Use `createproject.sh` to create a project. Example invocation:
 
-    PLATFORMS="android ios" ./makeharness.sh ../../cordova/cordova-app-harness
+    PLATFORMS="android ios" ./createproject.sh ../../cordova/cordova-app-harness
 
 For more info:
 
-    ./makeharness.sh --help
+    ./createproject.sh --help
 
 ### Extra Steps
 
 - Replace the default Cordova icons with your desired icons.
   - `rm platforms/android/res/drawable-*/icon.png`
   - `cp ../../mobile-chrome-apps/templates/default-app/assets/icons/icon128.png platforms/android/res/drawable/icon.png`
+- Replace the title in index.html to "Chrome ADT vX.X.X"
+  - `vim www/cdvah/index.html`
+
+### Cutting a Release
+
 - Update the version in `config.xml`
   - `vim config.xml`
 - Update versionCode in `platforms/android/AndroidManifest.xml`
   - `vim platforms/android/AndroidManifest.xml`
-- Replace the title in index.html to "Chrome ADT vX.X.X"
-  - `vim www/cdvah/index.html`
-- Build the app in release mode to get a signed APK file.
-  - `cordova build android --release`
+- Tag release
+  - `git tag -am "Tagged vX.X.X-alpha"`
+- Build apk
+  - `cd CCAHarness && ../buildharness.sh`
+- Upload apk to GitHub's releases page
+  - Attach the apk
+  - Write *short* release notes (download link should be visible without scrolling).
 
 ## TODO
 
