@@ -20,10 +20,18 @@ For more info:
 
 ### Extra Steps
 
-- Replace the title in index.html to "Chrome ADT"
 - Replace the default Cordova icons with your desired icons.
+  - `rm platforms/android/res/drawable-*/icon.png`
+  - `cp ../../mobile-chrome-apps/templates/default-app/assets/icons/icon128.png platforms/android/res/drawable/icon.png`
+- Update the version in `config.xml`
+  - `vim config.xml`
+- Update versionCode in `platforms/android/AndroidManifest.xml`
+  - `vim platforms/android/AndroidManifest.xml`
+- Replace the title in index.html to "Chrome ADT vX.X.X"
+  - `vim www/cdvah/index.html`
 - Build the app in release mode to get a signed APK file.
+  - `cordova build android --release`
 
 ## TODO
 
-- Add icons
+- Add custom icon
