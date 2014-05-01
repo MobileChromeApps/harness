@@ -1,6 +1,14 @@
 #!/bin/bash
 
-KEYSTORE_PATH=../CCAHarness-debug.keystore
+if [[ ! -e platforms/android ]]; then
+  echo "Use this script to build a signed ChromeADT.apk"
+  echo
+  echo "Usage:"
+  echo "  Run it with your CWD set to the root of the project"
+  exit 1
+fi
+
+KEYSTORE_PATH="$(dirname $0)/CCAHarness-debug.keystore"
 AAPT_PATH=$(which aapt)
 
 if [[ -z "$AAPT_PATH" ]]; then
@@ -17,13 +25,8 @@ if [[ -z "$AAPT_PATH" ]]; then
   fi
 fi
 
-if [[ ! -e platforms/android ]]; then
-  echo "Please run this with CWD=CCAHarness"
-  exit 1
-fi
-
-if [[ ! -e $KEYSTORE_PATH ]]; then
-  echo "Couldn't find $KEYSTORE_PATH"
+if [[ ! -e "$KEYSTORE_PATH" ]]; then
+  echo "Couldn't find keystore at: $KEYSTORE_PATH"
   exit 1
 fi
 
