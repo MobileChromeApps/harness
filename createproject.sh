@@ -30,6 +30,7 @@ fi
 
 export APP_ID=org.chromium.ChromeADT
 export APP_NAME="Chrome ADT"
+export APP_VERSION="0.4.2"
 "$AH_PATH/createproject.sh" "$DIR_NAME" || exit 1
 
 cd "$DIR_NAME"
